@@ -1,178 +1,181 @@
-# Flight rules for git
+# Git飞行规则(Flight Rules)
 
-#### What are "flight rules"?
+#### 前言
 
-A [guide for astronauts](http://www.jsc.nasa.gov/news/columbia/fr_generic.pdf) (now, programmers using git) about what to do when things go wrong.
+- 英文原版[README](https://github.com/k88hudson/git-flight-rules/blob/master/README.md)
+- 翻译可能存在错误或不标准的地方，欢迎大家指正和修改，谢谢！
 
->  *Flight Rules* are the hard-earned body of knowledge recorded in manuals that list, step-by-step, what to do if X occurs, and why. Essentially, they are extremely detailed, scenario-specific standard operating procedures. [...]
+#### 什么是"飞行规则"?
 
-> NASA has been capturing our missteps, disasters and solutions since the early 1960s, when Mercury-era ground teams first started gathering "lessons learned" into a compendium that now lists thousands of problematic situations, from engine failure to busted hatch handles to computer glitches, and their solutions.
+一个 [宇航员指南](http://www.jsc.nasa.gov/news/columbia/fr_generic.pdf) (现在, 程序员们都在使用GIT) 是关于出现问题过后应该怎么操作。
 
-&mdash; Chris Hadfield, *An Astronaut's Guide to Life*.
+>  *飞行规则(Flight Rules)* 是记录在手册上的来之不易的一系列知识，记录了某个事情发生的原因，以及怎样一步一步的进行处理。本质上, 它们是特定场景的非常详细的标准处理流程。 [...]
 
-#### Conventions for this document
+> 自20世纪60年代初以来，NASA一直在捕捉(capturing)我们的失误，灾难和解决方案, 当时水星时代(Mercury-era)的地面小组首先开始将“经验教训”收集到一个纲要(compendium)中，该纲现在已经有上千个问题情景，从发动机故障到破损的舱口把手到计算机故障，以及它们对应的解决方案。
 
-For clarity's sake all examples in this document use a customized bash prompt in order to indicate the current branch and whether or not there are staged changes. The branch is enclosed in parentheses, and a `*` next to the branch name indicates staged changes.
+&mdash; Chris Hadfield, *一个宇航员的生活指南(An Astronaut's Guide to Life)*。
+
+#### 这篇文章的约定
+
+为了清楚的表述，这篇文档里的所有例子使用了自定义的bash 提示，以便指示当前分支和是否有暂存的变化(changes)。分支名用小括号括起来，分支名后面跟的`*`表示暂存的变化(changes)。
 
 [![Join the chat at https://gitter.im/k88hudson/git-flight-rules](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/k88hudson/git-flight-rules?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 <!-- START doctoc generated TOC please keep comment here to allow auto update -->
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 **Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
 
-  - [Editing Commits](#editing-commits)
-    - [What did I just commit?](#what-did-i-just-commit)
-    - [I wrote the wrong thing in a commit message](#i-wrote-the-wrong-thing-in-a-commit-message)
-    - [I committed with the wrong name and email configured](#i-committed-with-the-wrong-name-and-email-configured)
-    - [I want to remove a file from a commit](#i-want-to-remove-a-file-from-a-commit)
-    - [I want to delete or remove my last commit](#i-want-to-delete-or-remove-my-last-commit)
-    - [Delete/remove arbitrary commit](#deleteremove-arbitrary-commit)
-    - [I tried to push my amended commit to a remote, but I got an error message](#i-tried-to-push-my-amended-commit-to-a-remote-but-i-got-an-error-message)
-    - [I accidentally did a hard reset, and I want my changes back](#i-accidentally-did-a-hard-reset-and-i-want-my-changes-back)
-  - [Staging](#staging)
-    - [I need to add staged changes to the previous commit](#i-need-to-add-staged-changes-to-the-previous-commit)
-    - [I want to stage part of a new file, but not the whole file](#i-want-to-stage-part-of-a-new-file-but-not-the-whole-file)
-    - [I want to add changes in one file to two different commits](#i-want-to-add-changes-in-one-file-to-two-different-commits)
-    - [I want to stage my unstaged edits, and unstage my staged edits](#i-want-to-stage-my-unstaged-edits-and-unstage-my-staged-edits)
-  - [Unstaged Edits](#unstaged-edits)
-    - [I want to move my unstaged edits to a new branch](#i-want-to-move-my-unstaged-edits-to-a-new-branch)
-    - [I want to move my unstaged edits to a different, existing branch](#i-want-to-move-my-unstaged-edits-to-a-different-existing-branch)
-    - [I want to discard my local, uncommitted changes](#i-want-to-discard-my-local-uncommitted-changes)
-    - [I want to discard specific unstaged changes](#i-want-to-discard-specific-unstaged-changes)
-  - [Branches](#branches)
-    - [I pulled from/into the wrong branch](#i-pulled-frominto-the-wrong-branch)
-    - [I want to discard local commits so my branch is the same as one on the server](#i-want-to-discard-local-commits-so-my-branch-is-the-same-as-one-on-the-server)
-    - [I committed to master instead of a new branch](#i-committed-to-master-instead-of-a-new-branch)
-    - [I want to keep the whole file from another ref-ish](#i-want-to-keep-the-whole-file-from-another-ref-ish)
-    - [I made several commits on a single branch that should be on different branches](#i-made-several-commits-on-a-single-branch-that-should-be-on-different-branches)
-    - [I want to delete local branches that were deleted upstream](#i-want-to-delete-local-branches-that-were-deleted-upstream)
-    - [I accidentally deleted my branch](#i-accidentally-deleted-my-branch)
-    - [I want to delete a branch](#i-want-to-delete-a-branch)
-    - [I want to rename a branch](#i-want-to-rename-a-branch)
-    - [I want to checkout to a remote branch that someone else is working on](#i-want-to-checkout-to-a-remote-branch-that-someone-else-is-working-on)
-  - [Rebasing and Merging](#rebasing-and-merging)
-    - [I want to undo rebase/merge](#undo-rebase)
-    - [I rebased, but I don't want to force push.](#i-rebased-but-i-dont-want-to-force-push)
-    - [I need to combine commits](#i-need-to-combine-commits)
-      - [Safe merging strategy](#safe-merging-strategy)
-      - [I need to merge a branch into a single commit](#i-need-to-merge-a-branch-into-a-single-commit)
-      - [I want to combine only unpushed commits](#i-want-to-combine-only-unpushed-commits)
-    - [Check if all commits on a branch are merged](#check-if-all-commits-on-a-branch-are-merged)
-    - [Possible issues with interactive rebases](#possible-issues-with-interactive-rebases)
-      - [The rebase editing screen says 'noop'](#the-rebase-editing-screen-says-noop)
-      - [There were conflicts](#there-were-conflicts)
-  - [Miscellaneous Objects](#miscellaneous-objects)
-    - [Clone all submodules](#clone-all-submodules)
-    - [Delete tag](#delete-tag)
-    - [Recover a deleted tag](#recover-a-deleted-tag)
-    - [Deleted Patch](#deleted-patch)
-  - [Tracking Files](#tracking-files)
-    - [I want to change a file name's capitalization, without changing the contents of the file.](#i-want-to-change-a-file-names-capitalization-without-changing-the-contents-of-the-file)
-    - [I want to remove a file from git but keep the file](#i-want-to-remove-a-file-from-git-but-keep-the-file)
-    - [I want to revert a file to a specific revision](#i-want-to-revert-a-file-to-a-specific-revision)
-  - [Configuration](#configuration)
-    - [I want to add aliases for some git commands](#i-want-to-add-aliases-for-some-git-commands)
-    - [I want to cache a username and password for a repository](#i-want-to-cache-a-username-and-password-for-a-repository)
-  - [I've no idea what I did wrong](#ive-no-idea-what-i-did-wrong)
-- [Other Resources](#other-resources)
-  - [Books](#books)
-  - [Tutorials](#tutorials)
-  - [Scripts and Tools](#scripts-and-tools)
-  - [GUI Clients](#gui-clients)
+  - [编辑提交(editting commits)](#%E7%BC%96%E8%BE%91%E6%8F%90%E4%BA%A4editting-commits)
+    - [我刚才提交了什么?](#%E6%88%91%E5%88%9A%E6%89%8D%E6%8F%90%E4%BA%A4%E4%BA%86%E4%BB%80%E4%B9%88)
+    - [我的提交信息(commit message)写错了](#%E6%88%91%E7%9A%84%E6%8F%90%E4%BA%A4%E4%BF%A1%E6%81%AFcommit-message%E5%86%99%E9%94%99%E4%BA%86)
+    - [我提交(commit)里的用户名和邮箱不对](#%E6%88%91%E6%8F%90%E4%BA%A4commit%E9%87%8C%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D%E5%92%8C%E9%82%AE%E7%AE%B1%E4%B8%8D%E5%AF%B9)
+    - [我想从一个提交(commit)里移除一个文件](#%E6%88%91%E6%83%B3%E4%BB%8E%E4%B8%80%E4%B8%AA%E6%8F%90%E4%BA%A4commit%E9%87%8C%E7%A7%BB%E9%99%A4%E4%B8%80%E4%B8%AA%E6%96%87%E4%BB%B6)
+    - [我想删除我的的最后一次提交(commit)](#%E6%88%91%E6%83%B3%E5%88%A0%E9%99%A4%E6%88%91%E7%9A%84%E7%9A%84%E6%9C%80%E5%90%8E%E4%B8%80%E6%AC%A1%E6%8F%90%E4%BA%A4commit)
+    - [删除任意提交(commit)](#%E5%88%A0%E9%99%A4%E4%BB%BB%E6%84%8F%E6%8F%90%E4%BA%A4commit)
+    - [我尝试推一个修正后的提交(amended commit)到远程，但是报错：](#%E6%88%91%E5%B0%9D%E8%AF%95%E6%8E%A8%E4%B8%80%E4%B8%AA%E4%BF%AE%E6%AD%A3%E5%90%8E%E7%9A%84%E6%8F%90%E4%BA%A4amended-commit%E5%88%B0%E8%BF%9C%E7%A8%8B%E4%BD%86%E6%98%AF%E6%8A%A5%E9%94%99)
+    - [我意外的做了一次硬重置(hard reset)，我想找回我的内容](#%E6%88%91%E6%84%8F%E5%A4%96%E7%9A%84%E5%81%9A%E4%BA%86%E4%B8%80%E6%AC%A1%E7%A1%AC%E9%87%8D%E7%BD%AEhard-reset%E6%88%91%E6%83%B3%E6%89%BE%E5%9B%9E%E6%88%91%E7%9A%84%E5%86%85%E5%AE%B9)
+  - [暂存(Staging)](#%E6%9A%82%E5%AD%98staging)
+    - [我需要把暂存的内容添加到上一次的提交(commit)](#%E6%88%91%E9%9C%80%E8%A6%81%E6%8A%8A%E6%9A%82%E5%AD%98%E7%9A%84%E5%86%85%E5%AE%B9%E6%B7%BB%E5%8A%A0%E5%88%B0%E4%B8%8A%E4%B8%80%E6%AC%A1%E7%9A%84%E6%8F%90%E4%BA%A4commit)
+    - [我想要暂存一个新文件的一部分，而不是这个文件的全部](#%E6%88%91%E6%83%B3%E8%A6%81%E6%9A%82%E5%AD%98%E4%B8%80%E4%B8%AA%E6%96%B0%E6%96%87%E4%BB%B6%E7%9A%84%E4%B8%80%E9%83%A8%E5%88%86%E8%80%8C%E4%B8%8D%E6%98%AF%E8%BF%99%E4%B8%AA%E6%96%87%E4%BB%B6%E7%9A%84%E5%85%A8%E9%83%A8)
+    - [我想把在一个文件里的变化(changes)加到两个提交(commit)里](#%E6%88%91%E6%83%B3%E6%8A%8A%E5%9C%A8%E4%B8%80%E4%B8%AA%E6%96%87%E4%BB%B6%E9%87%8C%E7%9A%84%E5%8F%98%E5%8C%96changes%E5%8A%A0%E5%88%B0%E4%B8%A4%E4%B8%AA%E6%8F%90%E4%BA%A4commit%E9%87%8C)
+    - [我想把暂存的内容变成未暂存，把未暂存的内容暂存起来](#%E6%88%91%E6%83%B3%E6%8A%8A%E6%9A%82%E5%AD%98%E7%9A%84%E5%86%85%E5%AE%B9%E5%8F%98%E6%88%90%E6%9C%AA%E6%9A%82%E5%AD%98%E6%8A%8A%E6%9C%AA%E6%9A%82%E5%AD%98%E7%9A%84%E5%86%85%E5%AE%B9%E6%9A%82%E5%AD%98%E8%B5%B7%E6%9D%A5)
+  - [未暂存(Unstaged)的内容](#%E6%9C%AA%E6%9A%82%E5%AD%98unstaged%E7%9A%84%E5%86%85%E5%AE%B9)
+    - [我想把未暂存的内容移动到一个新分支](#%E6%88%91%E6%83%B3%E6%8A%8A%E6%9C%AA%E6%9A%82%E5%AD%98%E7%9A%84%E5%86%85%E5%AE%B9%E7%A7%BB%E5%8A%A8%E5%88%B0%E4%B8%80%E4%B8%AA%E6%96%B0%E5%88%86%E6%94%AF)
+    - [我想把未暂存的内容移动到另一个已存在的分支](#%E6%88%91%E6%83%B3%E6%8A%8A%E6%9C%AA%E6%9A%82%E5%AD%98%E7%9A%84%E5%86%85%E5%AE%B9%E7%A7%BB%E5%8A%A8%E5%88%B0%E5%8F%A6%E4%B8%80%E4%B8%AA%E5%B7%B2%E5%AD%98%E5%9C%A8%E7%9A%84%E5%88%86%E6%94%AF)
+    - [我想丢弃本地未提交的变化(uncommitted changes)](#%E6%88%91%E6%83%B3%E4%B8%A2%E5%BC%83%E6%9C%AC%E5%9C%B0%E6%9C%AA%E6%8F%90%E4%BA%A4%E7%9A%84%E5%8F%98%E5%8C%96uncommitted-changes)
+    - [我想丢弃某些未暂存的内容](#%E6%88%91%E6%83%B3%E4%B8%A2%E5%BC%83%E6%9F%90%E4%BA%9B%E6%9C%AA%E6%9A%82%E5%AD%98%E7%9A%84%E5%86%85%E5%AE%B9)
+  - [分支(Branches)](#%E5%88%86%E6%94%AFbranches)
+    - [我从错误的分支拉取了内容，或把内容拉取到了错误的分支](#%E6%88%91%E4%BB%8E%E9%94%99%E8%AF%AF%E7%9A%84%E5%88%86%E6%94%AF%E6%8B%89%E5%8F%96%E4%BA%86%E5%86%85%E5%AE%B9%E6%88%96%E6%8A%8A%E5%86%85%E5%AE%B9%E6%8B%89%E5%8F%96%E5%88%B0%E4%BA%86%E9%94%99%E8%AF%AF%E7%9A%84%E5%88%86%E6%94%AF)
+    - [我想扔掉本地的提交(commit)，以便我的分支与远程的保持一致](#%E6%88%91%E6%83%B3%E6%89%94%E6%8E%89%E6%9C%AC%E5%9C%B0%E7%9A%84%E6%8F%90%E4%BA%A4commit%E4%BB%A5%E4%BE%BF%E6%88%91%E7%9A%84%E5%88%86%E6%94%AF%E4%B8%8E%E8%BF%9C%E7%A8%8B%E7%9A%84%E4%BF%9D%E6%8C%81%E4%B8%80%E8%87%B4)
+    - [我需要提交到一个新分支，但错误的提交到了master](#%E6%88%91%E9%9C%80%E8%A6%81%E6%8F%90%E4%BA%A4%E5%88%B0%E4%B8%80%E4%B8%AA%E6%96%B0%E5%88%86%E6%94%AF%E4%BD%86%E9%94%99%E8%AF%AF%E7%9A%84%E6%8F%90%E4%BA%A4%E5%88%B0%E4%BA%86master)
+    - [我想保留来自另外一个ref-ish的整个文件](#%E6%88%91%E6%83%B3%E4%BF%9D%E7%95%99%E6%9D%A5%E8%87%AA%E5%8F%A6%E5%A4%96%E4%B8%80%E4%B8%AAref-ish%E7%9A%84%E6%95%B4%E4%B8%AA%E6%96%87%E4%BB%B6)
+    - [我把几个提交(commit)提交到了同一个分支，而这些提交应该分布在不同的分支里](#%E6%88%91%E6%8A%8A%E5%87%A0%E4%B8%AA%E6%8F%90%E4%BA%A4commit%E6%8F%90%E4%BA%A4%E5%88%B0%E4%BA%86%E5%90%8C%E4%B8%80%E4%B8%AA%E5%88%86%E6%94%AF%E8%80%8C%E8%BF%99%E4%BA%9B%E6%8F%90%E4%BA%A4%E5%BA%94%E8%AF%A5%E5%88%86%E5%B8%83%E5%9C%A8%E4%B8%8D%E5%90%8C%E7%9A%84%E5%88%86%E6%94%AF%E9%87%8C)
+    - [我想删除上游(upstream)分支被删除了的本地分支](#%E6%88%91%E6%83%B3%E5%88%A0%E9%99%A4%E4%B8%8A%E6%B8%B8upstream%E5%88%86%E6%94%AF%E8%A2%AB%E5%88%A0%E9%99%A4%E4%BA%86%E7%9A%84%E6%9C%AC%E5%9C%B0%E5%88%86%E6%94%AF)
+    - [我不小心删除了我的分支](#%E6%88%91%E4%B8%8D%E5%B0%8F%E5%BF%83%E5%88%A0%E9%99%A4%E4%BA%86%E6%88%91%E7%9A%84%E5%88%86%E6%94%AF)
+    - [我想删除一个分支](#%E6%88%91%E6%83%B3%E5%88%A0%E9%99%A4%E4%B8%80%E4%B8%AA%E5%88%86%E6%94%AF)
+    - [我想从别人正在工作的远程分支签出(checkout)一个分支](#%E6%88%91%E6%83%B3%E4%BB%8E%E5%88%AB%E4%BA%BA%E6%AD%A3%E5%9C%A8%E5%B7%A5%E4%BD%9C%E7%9A%84%E8%BF%9C%E7%A8%8B%E5%88%86%E6%94%AF%E7%AD%BE%E5%87%BAcheckout%E4%B8%80%E4%B8%AA%E5%88%86%E6%94%AF)
+  - [Rebasing 和合并(Merging)](#rebasing-%E5%92%8C%E5%90%88%E5%B9%B6merging)
+    - [我想撤销rebase/merge](#%E6%88%91%E6%83%B3%E6%92%A4%E9%94%80rebasemerge)
+    - [我已经rebase过, 但是我不想强推(force push)](#%E6%88%91%E5%B7%B2%E7%BB%8Frebase%E8%BF%87-%E4%BD%86%E6%98%AF%E6%88%91%E4%B8%8D%E6%83%B3%E5%BC%BA%E6%8E%A8force-push)
+    - [我需要组合(combine)几个提交(commit)](#%E6%88%91%E9%9C%80%E8%A6%81%E7%BB%84%E5%90%88combine%E5%87%A0%E4%B8%AA%E6%8F%90%E4%BA%A4commit)
+      - [安全合并(merging)策略](#%E5%AE%89%E5%85%A8%E5%90%88%E5%B9%B6merging%E7%AD%96%E7%95%A5)
+      - [我需要将一个分支合并成一个提交(commit)](#%E6%88%91%E9%9C%80%E8%A6%81%E5%B0%86%E4%B8%80%E4%B8%AA%E5%88%86%E6%94%AF%E5%90%88%E5%B9%B6%E6%88%90%E4%B8%80%E4%B8%AA%E6%8F%90%E4%BA%A4commit)
+      - [我只想组合(combine)未推的提交(unpushed commit)](#%E6%88%91%E5%8F%AA%E6%83%B3%E7%BB%84%E5%90%88combine%E6%9C%AA%E6%8E%A8%E7%9A%84%E6%8F%90%E4%BA%A4unpushed-commit)
+    - [检查是否分支上的所有提交(commit)都合并(merge)过了](#%E6%A3%80%E6%9F%A5%E6%98%AF%E5%90%A6%E5%88%86%E6%94%AF%E4%B8%8A%E7%9A%84%E6%89%80%E6%9C%89%E6%8F%90%E4%BA%A4commit%E9%83%BD%E5%90%88%E5%B9%B6merge%E8%BF%87%E4%BA%86)
+    - [交互式rebase(interactive rebase)可能出现的问题](#%E4%BA%A4%E4%BA%92%E5%BC%8Frebaseinteractive-rebase%E5%8F%AF%E8%83%BD%E5%87%BA%E7%8E%B0%E7%9A%84%E9%97%AE%E9%A2%98)
+      - [这个rebase 编辑屏幕出现'noop'](#%E8%BF%99%E4%B8%AArebase-%E7%BC%96%E8%BE%91%E5%B1%8F%E5%B9%95%E5%87%BA%E7%8E%B0noop)
+      - [有冲突的情况](#%E6%9C%89%E5%86%B2%E7%AA%81%E7%9A%84%E6%83%85%E5%86%B5)
+  - [杂项(Miscellaneous Objects)](#%E6%9D%82%E9%A1%B9miscellaneous-objects)
+    - [克隆所有子模块](#%E5%85%8B%E9%9A%86%E6%89%80%E6%9C%89%E5%AD%90%E6%A8%A1%E5%9D%97)
+    - [删除标签(tag)](#%E5%88%A0%E9%99%A4%E6%A0%87%E7%AD%BEtag)
+    - [恢复已删除标签(tag)](#%E6%81%A2%E5%A4%8D%E5%B7%B2%E5%88%A0%E9%99%A4%E6%A0%87%E7%AD%BEtag)
+    - [已删除补丁(patch)](#%E5%B7%B2%E5%88%A0%E9%99%A4%E8%A1%A5%E4%B8%81patch)
+  - [跟踪文件(Tracking Files)](#%E8%B7%9F%E8%B8%AA%E6%96%87%E4%BB%B6tracking-files)
+    - [我只想改变一个文件名字的大小写，而不修改内容](#%E6%88%91%E5%8F%AA%E6%83%B3%E6%94%B9%E5%8F%98%E4%B8%80%E4%B8%AA%E6%96%87%E4%BB%B6%E5%90%8D%E5%AD%97%E7%9A%84%E5%A4%A7%E5%B0%8F%E5%86%99%E8%80%8C%E4%B8%8D%E4%BF%AE%E6%94%B9%E5%86%85%E5%AE%B9)
+    - [我想从Git删除一个文件，但保留该文件](#%E6%88%91%E6%83%B3%E4%BB%8Egit%E5%88%A0%E9%99%A4%E4%B8%80%E4%B8%AA%E6%96%87%E4%BB%B6%E4%BD%86%E4%BF%9D%E7%95%99%E8%AF%A5%E6%96%87%E4%BB%B6)
+  - [配置(Configuration)](#%E9%85%8D%E7%BD%AEconfiguration)
+    - [我想给一些Git命令添加别名(alias)](#%E6%88%91%E6%83%B3%E7%BB%99%E4%B8%80%E4%BA%9Bgit%E5%91%BD%E4%BB%A4%E6%B7%BB%E5%8A%A0%E5%88%AB%E5%90%8Dalias)
+    - [我想缓存一个仓库(repository)的用户名和密码](#%E6%88%91%E6%83%B3%E7%BC%93%E5%AD%98%E4%B8%80%E4%B8%AA%E4%BB%93%E5%BA%93repository%E7%9A%84%E7%94%A8%E6%88%B7%E5%90%8D%E5%92%8C%E5%AF%86%E7%A0%81)
+  - [我不知道我做错了些什么](#%E6%88%91%E4%B8%8D%E7%9F%A5%E9%81%93%E6%88%91%E5%81%9A%E9%94%99%E4%BA%86%E4%BA%9B%E4%BB%80%E4%B9%88)
+- [其它资源(Other Resources)](#%E5%85%B6%E5%AE%83%E8%B5%84%E6%BA%90other-resources)
+  - [书(Books)](#%E4%B9%A6books)
+  - [教程(Tutorials)](#%E6%95%99%E7%A8%8Btutorials)
+  - [脚本和工具(Scripts and Tools)](#%E8%84%9A%E6%9C%AC%E5%92%8C%E5%B7%A5%E5%85%B7scripts-and-tools)
+  - [GUI客户端(GUI Clients)](#gui%E5%AE%A2%E6%88%B7%E7%AB%AFgui-clients)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
 
-## Editing Commits
+## 编辑提交(editting commits)
 
 <a name="diff-last"></a>
-### What did I just commit?
+### 我刚才提交了什么?
 
-Let's say that you just blindly committed changes with `git commit -a` and you're not sure what the actual content of the commit you just made was. You can show the latest commit on your current HEAD with:
+如果你用 `git commit -a` 提交了一次变化(changes)，而你又不确定到底这次提交了哪些面容。 你就可以用下面的命令显示当前`HEAD`上的最近一次的提交(commit):
 
 ```sh
 (master)$ git show
 ```
 
-or
+或者
 
 ```sh
 $ git log -n1 -p
 ```
 
 <a name="#i-wrote-the-wrong-thing-in-a-commit-message"></a>
-### I wrote the wrong thing in a commit message
+### 我的提交信息(commit message)写错了
 
-If you wrote the wrong thing and the commit has not yet been pushed, you can do the following to change the commit message:
+如果你的提交信息(commit message)写错了且这次提交(commit)还没有推(push), 你可以通过下面的方法来修改提交信息(commit message):
 
 ```sh
 $ git commit --amend
 ```
-This will open your default text editor, where you can edit the message. On the other hand, you can do this all in one command:
+这会打开你的默认编辑器, 在这里你可以编辑信息. 另一方面, 你也可以用一条命令一次完成:
 
 ```sh
 $ git commit --amend -m 'xxxxxxx'
 ```
 
-If you have already pushed the message, you can amend the commit and force push, but this is not recommended.
+如果你已经推(push)了这次提交(commit), 你可以修改这次提交(commit)然后强推(force push), 但是不推荐这么做。
 
 <a name="commit-wrong-author"></a>
-### I committed with the wrong name and email configured
+### 我提交(commit)里的用户名和邮箱不对
 
-If it's a single commit, amend it
+如果这只是单个提交(commit)，修改它：
 
 ```sh
 $ git commit --amend --author "New Authorname <authoremail@mydomain.com>"
 ```
 
-If you need to change all of history, see the man page for 'git filter-branch'.
+如果你需要修改所有历史, 参考 'git filter-branch'的指南页.
 
 
 <a href="#i-want-to-remove-a-file-from-a-commit"></a>
-### I want to remove a file from a commit
+### 我想从一个提交(commit)里移除一个文件
 
-In order to remove a file from a commit, do the following:
+通过下面的方法，从一个提交(commit)里移除一个文件:
 
 ```sh
 $ git checkout HEAD^ myfile
-$ git add myfile
-$ git commit --amend --no-edit
+$ git add -A
+$ git commit --amend
 ```
 
-This is particularly useful when you have an open patch and you have committed an unnecessary file, and need to force push to update the patch on a remote. The `--no-edit` option is used to keep the existing commit message.
+这将非常有用，当你有一个开放的补丁(open patch)，你往上面提交了一个不必要的文件，你需要强推(force push)去更新这个远程补丁。
 
 <a name="delete-pushed-commit"></a>
-### I want to delete or remove my last commit
+### 我想删除我的的最后一次提交(commit)
 
-If you need to delete pushed commits, you can use the following. However, it will irreversibly change your history, and mess up the history of anyone else who had already pulled from the repository. In short, if you're not sure, you should never do this, ever.
+如果你需要删除推了的提交(pushed commits)，你可以使用下面的方法。可是，这会不可逆的改变你的历史，也会搞乱那些已经从该仓库拉取(pulled)了的人的历史。简而言之，如果你不是很确定，千万不要这么做。
 
 ```sh
 $ git reset HEAD^ --hard
-$ git push --force-with-lease [remote] [branch]
+$ git push -f [remote] [branch]
 ```
 
-If you haven't pushed, to reset Git to the state it was in before you made your last commit (while keeping your staged changes):
+如果你还没有推到远程, 把Git重置(reset)到你最后一次提交前的状态就可以了(同时保存暂存的变化):
 
 ```
 (my-branch*)$ git reset --soft HEAD@{1}
 
 ```
 
-This only works if you haven't pushed. If you have pushed, the only truly safe thing to do is `git revert SHAofBadCommit`. That will create a new commit that undoes all the previous commit's changes. Or, if the branch you pushed to is rebase-safe (ie. other devs aren't expected to pull from it), you can just use `git push --force-with-lease`. For more, see [the above section](#deleteremove-last-pushed-commit).
+这只能在没有推送之前有用. 如果你已经推了, 唯一安全能做的是 `git revert SHAofBadCommit`， 那会创建一个新的提交(commit)用于撤消前一个提交的所有变化(changes)； 或者, 如果你推的这个分支是rebase-safe的 (例如： 其它开发者不会从这个分支拉), 只需要使用 `git push -f`； 更多, 请参考 [the above section](#deleteremove-last-pushed-commit)。
 
 <a name="delete-any-commit"></a>
-### Delete/remove arbitrary commit
+### 删除任意提交(commit)
 
-The same warning applies as above. Never do this if possible.
+同样的警告：不到万不得已的时候不要这么做.
 
 ```sh
 $ git rebase --onto SHA1_OF_BAD_COMMIT^ SHA1_OF_BAD_COMMIT
-$ git push --force-with-lease [remote] [branch]
+$ git push -f [remote] [branch]
 ```
 
-Or do an [interactive rebase](#interactive-rebase) and remove the line(s) corresponding to commit(s) you want to see removed.
+或者做一个 [交互式rebase](#interactive-rebase) 删除那些你想要删除的提交(commit)里所对应的行。
 
 <a name="#force-push"></a>
-### I tried to push my amended commit to a remote, but I got an error message
+### 我尝试推一个修正后的提交(amended commit)到远程，但是报错：
 
 ```sh
 To https://github.com/yourusername/repo.git
@@ -184,37 +187,35 @@ hint: 'git pull ...') before pushing again.
 hint: See the 'Note about fast-forwards' in 'git push --help' for details.
 ```
 
-Note that, as with rebasing (see below), amending **replaces the old commit with a new one**, so you must force push (`--force-with-lease`) your changes if you have already pushed the pre-amended commit to your remote. Be careful when you do this &ndash; *always* make sure you specify a branch!
+注意, rebasing(见下面)和修正(amending)会用一个**新的提交(commit)代替旧的**, 所以如果之前你已经往远程仓库上推过一次修正前的提交(commit)，那你现在就必须强推(force push) (`-f`)。 注意 &ndash; *总是* 确保你指明一个分支!
 
 ```sh
-(my-branch)$ git push origin mybranch --force-with-lease
+(my-branch)$ git push origin mybranch -f
 ```
 
-In general, **avoid force pushing**. It is best to create and push a new commit rather than force-pushing the amended commit as it has will cause conflicts in the source history for any other developer who has interacted with the branch in question or any child branches. `--force-with-lease` will still fail, if someone else was also working on the same branch as you, and your push would overwrite those changes.
-
-If you are *absolutely* sure that nobody is working on the same branch or you want to update the tip of the branch *unconditionally*, you can use `--force` (`-f`), but this should be avoided in general.
+一般来说, **要避免强推**. 最好是创建和推(push)一个新的提交(commit)，而不是强推一个修正后的提交。后者会使那些与该分支或该分支的子分支工作的开发者，在源历史中产生冲突。
 
 <a href="undo-git-reset-hard"></a>
-### I accidentally did a hard reset, and I want my changes back
+### 我意外的做了一次硬重置(hard reset)，我想找回我的内容
 
-If you accidentally do `git reset --hard`, you can normally still get your commit back, as git keeps a log of everything for a few days.
+如果你意外的做了 `git reset --hard`, 你通常能找回你的提交(commit), 因为Git对每件事都会有日志，且都会保存几天。
 
 ```sh
 (master)$ git reflog
 ```
 
-You'll see a list of your past commits, and a commit for the reset. Choose the SHA of the commit you want to return to, and reset again:
+你将会看到一个你过去提交(commit)的列表, 和一个重置的提交。 选择你想要回到的提交(commit)的SHA，再重置一次:
 
 ```sh
 (master)$ git reset --hard SHA1234
 ```
 
-And you should be good to go.
+这样就完成了。
 
-## Staging
+## 暂存(Staging)
 
 <a href="#i-need-to-add-staged-changes-to-the-previous-commit"></a>
-### I need to add staged changes to the previous commit
+### 我需要把暂存的内容添加到上一次的提交(commit)
 
 ```sh
 (my-branch*)$ git commit --amend
@@ -222,33 +223,33 @@ And you should be good to go.
 ```
 
 <a name="commit-partial-new-file"></a>
-### I want to stage part of a new file, but not the whole file
+### 我想要暂存一个新文件的一部分，而不是这个文件的全部
 
-Normally, if you want to stage part of a file, you run this:
+一般来说, 如果你想暂存一个文件的一部分, 你可这样做:
 
 ```sh
 $ git add --patch filename.x
 ```
 
-`-p` will work for short. This will open interactive mode. You would be able to use the `s` option to split the commit - however, if the file is new, you will not have this option. To add a new file, do this:
+`-p` 简写。这会打开交互模式， 你将能够用 `s` 选项来分隔提交(commit)； 然而, 如果这个文件是新的, 会没有这个选择， 添加一个新文件时, 这样做:
 
 ```sh
 $ git add -N filename.x
 ```
 
-Then, you will need to use the `e` option to manually choose which lines to add. Running `git diff --cached` will show you which lines you have staged compared to which are still saved locally.
+然后, 你需要用 `e` 选项来手动选择需要添加的行，执行 `git diff --cached` 将会显示哪些行暂存了哪些行只是保存在本地了。
 
 
 <a href="stage-in-two-commits"></a>
-### I want to add changes in one file to two different commits
+### 我想把在一个文件里的变化(changes)加到两个提交(commit)里
 
-`git add` will add the entire file to a commit. `git add -p` will allow to interactively select which changes you want to add.
+`git add` 会把整个文件加入到一个提交. `git add -p` 允许交互式的选择你想要提交的部分.
 
 
 <a href="unstaging-edits-and-staging-the-unstaged"></a>
-### I want to stage my unstaged edits, and unstage my staged edits
+### 我想把暂存的内容变成未暂存，把未暂存的内容暂存起来
 
-This is tricky. The best I figure is that you should stash your unstaged edits. Then, reset. After that, pop your stashed edits back, and add them.
+这个有点困难， 我能想到的最好的方法是先stash未暂存的内容， 然后重置(reset)，再pop第一步stashed的内容, 最后再add它们。
 
 ```sh
 $ git stash -k
@@ -257,17 +258,17 @@ $ git stash pop
 $ git add -A
 ```
 
-## Unstaged Edits
+## 未暂存(Unstaged)的内容
 
 <a href="move-unstaged-edits-to-new-branch"></a>
-### I want to move my unstaged edits to a new branch
+### 我想把未暂存的内容移动到一个新分支
 
 ```sh
 $ git checkout -b my-branch
 ```
 
 <a href="move-unstaged-edits-to-old-branch"></a>
-### I want to move my unstaged edits to a different, existing branch
+### 我想把未暂存的内容移动到另一个已存在的分支
 
 ```sh
 $ git stash
@@ -276,9 +277,9 @@ $ git stash pop
 ```
 
 <a href="i-want-to-discard-my-local-uncommitted-changes"></a>
-### I want to discard my local, uncommitted changes
+### 我想丢弃本地未提交的变化(uncommitted changes)
 
-If you want to only reset to some commit between origin and your local, you can do this:
+如果你只是想重置源(origin)和你本地(local)之间的一些提交(commit)，你可以：
 
 ```sh
 # one commit
@@ -291,25 +292,25 @@ If you want to only reset to some commit between origin and your local, you can 
 (master)$ git checkout -f
 ```
 
-To reset only a specific file, you can use that the filename as the argument:
+重置某个特殊的文件, 你可以用文件名做为参数:
 
 ```sh
 $ git reset filename
 ```
 
 <a href="i-want-to-discard-specific-unstaged-changes"></a>
-### I want to discard specific unstaged changes
+### 我想丢弃某些未暂存的内容
 
-When you want to get rid of some, but not all changes in your working copy.
+如果你想丢弃工作拷贝中的一部分内容，而不是全部。
 
-Checkout undesired changes, keep good changes.
+签出(checkout)不需要的内容，保留需要的。
 
 ```sh
 $ git checkout -p
 # Answer y to all of the snippets you want to drop
 ```
 
-Another strategy involves using `stash`. Stash all the good changes, reset working copy, and reapply good changes.
+另外一个方法是使用 `stash`， Stash所有要保留下的内容, 重置工作拷贝, 重新应用保留的部分。
 
 ```sh
 $ git stash -p
@@ -318,7 +319,7 @@ $ git reset --hard
 $ git stash pop
 ```
 
-Alternatively, stash your undesired changes, and then drop stash.
+或者, stash 你不需要的部分, 然后stash drop。
 
 ```sh
 $ git stash -p
@@ -326,12 +327,12 @@ $ git stash -p
 $ git stash drop
 ```
 
-## Branches
+## 分支(Branches)
 
 <a name="pull-wrong-branch"></a>
-### I pulled from/into the wrong branch
+### 我从错误的分支拉取了内容，或把内容拉取到了错误的分支
 
-This is another chance to use `git reflog` to see where your HEAD pointed before the bad pull.
+这是另外一种使用 `git reflog` 情况，找到在这次错误拉(pull) 之前HEAD的指向。
 
 ```sh
 (master)$ git reflog
@@ -339,20 +340,20 @@ ab7555f HEAD@{0}: pull origin wrong-branch: Fast-forward
 c5bc55a HEAD@{1}: checkout: checkout message goes here
 ```
 
-Simply reset your branch back to the desired commit:
+重置分支到你所需的提交(desired commit):
 
 ```sh
 $ git reset --hard c5bc55a
 ```
 
-Done.
+完成。
 
 <a href="discard-local-commits"></a>
-### I want to discard local commits so my branch is the same as one on the server
+### 我想扔掉本地的提交(commit)，以便我的分支与远程的保持一致
 
-Confirm that you haven't pushed your changes to the server.
+先确认你没有推(push)你的内容到远程。
 
-`git status` should show how many commits you are ahead of origin:
+`git status` 会显示你领先(ahead)源(origin)多少个提交:
 
 ```sh
 (my-branch)$ git status
@@ -362,69 +363,67 @@ Confirm that you haven't pushed your changes to the server.
 #
 ```
 
-One way of resetting to match origin (to have the same as what is on the remote) is to do this:
+一种方法是:
 
 ```sh
 (master)$ git reset --hard origin/my-branch
 ```
 
 <a name="commit-wrong-branch"></a>
-### I committed to master instead of a new branch
+### 我需要提交到一个新分支，但错误的提交到了master
 
-Create the new branch while remaining on master:
+在master下创建一个新分支，不切换到新分支,仍在master下:
 
 ```sh
 (master)$ git branch my-branch
 ```
 
-Reset the branch master to the previous commit:
+把master分支重置到前一个提交:
 
 ```sh
 (master)$ git reset --hard HEAD^
 ```
 
-`HEAD^` is short for `HEAD^1`. This stands for the first parent of `HEAD`, similarly `HEAD^2` stands for the second parent of the commit (merges can have 2 parents).
+`HEAD^` 是 `HEAD^1` 的简写，你可以通过指定要设置的`HEAD`来进一步重置。
 
-Note that `HEAD^2` is **not** the same as `HEAD~2` (see [this link](http://www.paulboxley.com/blog/2011/06/git-caret-and-tilde) for more information).
+或者, 如果你不想使用 `HEAD^`, 找到你想重置到的提交(commit)的hash(`git log` 能够完成)， 然后重置到这个hash。 使用`git push` 同步内容到远程。
 
-Alternatively, if you don't want to use `HEAD^`, find out what the commit hash you want to set your master branch to (`git log` should do the trick). Then reset to that hash. `git push` will make sure that this change is reflected on your remote.
-
-For example, if the hash of the commit that your master branch is supposed to be at is `a13b85e`:
+例如, master分支想重置到的提交的hash为`a13b85e`:
 
 ```sh
 (master)$ git reset --hard a13b85e
 HEAD is now at a13b85e
 ```
 
-Checkout the new branch to continue working:
+签出(checkout)刚才新建的分支继续工作:
 
 ```sh
 (master)$ git checkout my-branch
 ```
 
 <a name="keep-whole-file"></a>
-### I want to keep the whole file from another ref-ish
+### 我想保留来自另外一个ref-ish的整个文件
 
-Say you have a working spike (see note), with hundreds of changes. Everything is working. Now, you commit into another branch to save that work:
+假设你正在做一个原型方案(原文为working spike (see note)), 有成百的内容，每个都工作得很好。现在, 你提交到了一个分支，保存工作内容:
 
 ```sh
 (solution)$ git add -A && git commit -m "Adding all changes from this spike into one big commit."
 ```
 
-When you want to put it into a branch (maybe feature, maybe `develop`), you're interested in keeping whole files. You want to split your big commit into smaller ones.
+当你想要把它放到一个分支里 (可能是`feature`, 或者 `develop`), 你关心是保持整个文件的完整，你想要一个大的提交分隔成比较小。
 
-Say you have:
+假设你有:
 
-  * branch `solution`, with the solution to your spike. One ahead of `develop`.
-  * branch `develop`, where you want to add your changes.
+  * 分支 `solution`, 拥有原型方案， 领先 `develop` 分支。
+  * 分支 `develop`, 在这里你应用原型方案的一些内容。
 
-You can solve it bringing the contents to your branch:
+我去可以通过把内容拿到你的分支里，来解决这个问题:
 
 ```sh
 (develop)$ git checkout solution -- file1.txt
 ```
 
-This will get the contents of that file in branch `solution` to your branch `develop`:
+这会把这个文件内容从分支 `solution` 拿到分支 `develop` 里来:
 
 ```sh
 # On branch develop
@@ -435,14 +434,14 @@ This will get the contents of that file in branch `solution` to your branch `dev
 #        modified:   file1.txt
 ```
 
-Then, commit as usual.
+然后, 正常提交。
 
 Note: Spike solutions are made to analyze or solve the problem. These solutions are used for estimation and discarded once everyone gets clear visualization of the problem. ~ [Wikipedia](https://en.wikipedia.org/wiki/Extreme_programming_practices).
 
 <a name="cherry-pick"></a>
-### I made several commits on a single branch that should be on different branches
+### 我把几个提交(commit)提交到了同一个分支，而这些提交应该分布在不同的分支里
 
-Say you are on your master branch. Running `git log`, you see you have made two commits:
+假设你有一个`master`分支， 执行`git log`, 你看到你做过两次提交:
 
 ```sh
 (master)$ git log
@@ -466,32 +465,32 @@ Date:   Tue Jul 21 01:12:48 2014 -0400
     First commit
 ```
 
-Let's take note of our commit hashes for each bug (`e3851e8` for #21, `5ea5173` for #14).
+让我们用提交hash(commit hash)标记bug (`e3851e8` for #21, `5ea5173` for #14).
 
-First, let's reset our master branch to the correct commit (`a13b85e`):
+首先, 我们把`master`分支重置到正确的提交(`a13b85e`):
 
 ```sh
 (master)$ git reset --hard a13b85e
 HEAD is now at a13b85e
 ```
 
-Now, we can create a fresh branch for our bug #21 branch:
+现在, 我们对 bug #21 创建一个新的分支:
 
 ```sh
 (master)$ git checkout -b 21
 (21)$
 ```
 
-Now, let's *cherry-pick* the commit for bug #21 on top of our branch. That means we will be applying that commit, and only that commit, directly on top of whatever our head is at.
+接着, 我们用 *cherry-pick* 把对bug #21的提交放入当前分支。 这意味着我们将应用(apply)这个提交(commit)，仅仅这一个提交(commit)，直接在HEAD上面。
 
 ```sh
 (21)$ git cherry-pick e3851e8
 ```
 
-At this point, there is a possibility there might be conflicts. See the [**There were conflicts**](#merge-conflict) section in the [interactive rebasing section above](#interactive-rebase) for how to resolve conflicts.
+这时候, 这里可能会产生冲突， 参见[交互式 rebasing 章](#interactive-rebase) [**冲突节**](#merge-conflict) 解决冲突.
 
 
-Now let's create a new branch for bug #14, also based on master
+再者， 我们为bug #14 创建一个新的分支, 也基于`master`分支
 
 ```sh
 (21)$ git checkout master
@@ -499,7 +498,7 @@ Now let's create a new branch for bug #14, also based on master
 (14)$
 ```
 
-And finally, let's cherry-pick the commit for bug #14:
+最后, 为 bug #14 执行 `cherry-pick`:
 
 ```sh
 (14)$ git cherry-pick 5ea5173
@@ -507,17 +506,17 @@ And finally, let's cherry-pick the commit for bug #14:
 
 
 <a name="delete-stale-local-branches"></a>
-### I want to delete local branches that were deleted upstream
-Once you merge a pull request on github, it gives you the option to delete the merged branch in your fork. If you aren't planning to keep working on the branch, it's cleaner to delete the local copies of the branch so you don't end up cluttering up your working checkout with a lot of stale branches.
+### 我想删除上游(upstream)分支被删除了的本地分支
+一旦你在github 上面合并(merge)了一个pull request, 你就可以删除你fork里被合并的分支。 如果你不准备继续在这个分支里工作, 删除这个分支的本地拷贝会更干净，使你不会陷入工作分支和一堆陈旧分支的混乱之中。
 
 ```sh
 $ git fetch -p
 ```
 
 <a name='restore-a-deleted-branch'></a>
-### I accidentally deleted my branch
+### 我不小心删除了我的分支
 
-If you're regularly pushing to remote, you should be safe most of the time. But still sometimes you may end up deleting your branches. Let's say we create a branch and create a new file:
+如果你定期推送到远程, 多数情况下应该是安全的，但有些时候还是可能删除了还没有推到远程的分支。 让我们先创建一个分支和一个新的文件:
 
 ```sh
 (master)$ git checkout -b my-branch
@@ -527,7 +526,7 @@ If you're regularly pushing to remote, you should be safe most of the time. But 
 README.md foo.txt
 ```
 
-Let's add it and commit.
+添加文件并做一次提交
 
 ```sh
 (my-branch)$ git add .
@@ -550,7 +549,7 @@ Date:   Tue Jul 29 13:14:46 2014 -0400
     Fixes #6: Force pushing after amending commits
 ```
 
-Now we're switching back to master and 'accidentally' removing our branch.
+现在我们切回到主(master)分支，‘不小心的’删除`my-branch`分支
 
 ```sh
 (my-branch)$ git checkout master
@@ -562,7 +561,7 @@ Deleted branch my-branch (was 4e3cd85).
 oh noes, deleted my branch!
 ```
 
-At this point you should get familiar with 'reflog', an upgraded logger. It stores the history of all the action in the repo.
+在这时候你应该想起了`reflog`, 一个升级版的日志，它存储了仓库(repo)里面所有动作的历史。
 
 ```
 (master)$ git reflog
@@ -571,7 +570,7 @@ At this point you should get familiar with 'reflog', an upgraded logger. It stor
 69204cd HEAD@{2}: checkout: moving from master to my-branch
 ```
 
-As you can see we have commit hash from our deleted branch. Let's see if we can restore our deleted branch.
+正如你所见，我们有一个来自删除分支的提交hash(commit hash)，接下来看看是否能恢复删除了的分支。
 
 ```sh
 (master)$ git checkout -b my-branch-help
@@ -582,54 +581,39 @@ HEAD is now at 4e3cd85 foo.txt added
 README.md foo.txt
 ```
 
-Voila! We got our removed file back. Git reflog is also useful when rebasing goes terribly wrong.
+看! 我们把删除的文件找回来了。 Git的 `reflog` 在rebasing出错的时候也是同样有用的。
 
 <a name="i-want-to-delete-a-branch"></a>
-### I want to delete a branch
+### 我想删除一个分支
 
-To delete a remote branch:
+删除一个远程分支:
 
 ```sh
 (master)$ git push origin --delete my-branch
 ```
 
-You can also do:
+你也可以:
 
 ```sh
 (master)$ git push origin :my-branch
 ```
 
-To delete a local branch:
+删除一个本地分支:
 
 ```sh
 (master)$ git branch -D my-branch
 ```
 
-<a name="i-want-to-rename-a-branch"></a>
-### I want to rename a branch
-
-To rename a local current branch:
-
-```sh
-(master)$ git branch -m new-name
-```
-
-To rename a local different branch:
-
-```sh
-(master)$ git branch -m old-name new-name
-```
-
 <a name="i-want-to-checkout-to-a-remote-branch-that-someone-else-is-working-on"></a>
-### I want to checkout to a remote branch that someone else is working on
+### 我想从别人正在工作的远程分支签出(checkout)一个分支
 
-First, fetch all branches from remote:
+首先, 从远程拉取(fetch) 所有分支:
 
 ```sh
 (master)$ git fetch --all
 ```
 
-Say you want to checkout to `daves` from the remote.
+假设你想要从远程的`daves`分支签出到本地的`daves`
 
 ```sh
 (master)$ git checkout --track origin/daves
@@ -637,25 +621,25 @@ Branch daves set up to track remote branch daves from origin.
 Switched to a new branch 'daves'
 ```
 
-(`--track` is shorthand for `git checkout -b [branch] [remotename]/[branch]`)
+(`--track` 是 `git checkout -b [branch] [remotename]/[branch]` 的简写)
 
-This will give you a local copy of the branch `daves`, and any update that has been pushed will also show up remotely.
+这样就得到了一个`daves`分支的本地拷贝, 任何推过(pushed)的更新，远程都能看到.
 
-## Rebasing and Merging
+## Rebasing 和合并(Merging)
 
 <a name="undo-rebase"></a>
-### I want to undo rebase/merge
+### 我想撤销rebase/merge
 
-You may have merged or rebased your current branch with a wrong branch, or you can't figure it out or finish the rebase/merge process. Git saves the original HEAD pointer in a variable called ORIG_HEAD before doing dangerous operations, so it is simple to recover your branch at the state before the rebase/merge.
+你可以合并(merge)或rebase了一个错误的分支, 或者完成不了一个进行中的rebase/merge。 Git 在进行危险操作的时候会把原始的HEAD保存在一个叫ORIG_HEAD的变量里, 所以要把分支恢复到rebase/merge前的状态是很容易的。
 
 ```sh
 (my-branch)$ git reset --hard ORIG_HEAD
 ```
 
 <a name="force-push-rebase"></a>
-### I rebased, but I don't want to force push.
+### 我已经rebase过, 但是我不想强推(force push)
 
-Unfortunately, you have to force push, if you want those changes to be reflected on the remote branch. This is because you have fast forwarded your commit, and changed git history. The remote branch won't accept changes unless you force push. This is one of the main reasons many people use a merge workflow, instead of a rebasing workflow - large teams can get into trouble with developers force pushing. Use this with caution. A safer way to use rebase is not to reflect your changes on the remote branch at all, and instead to do the following:
+不幸的是，如果你想把这些变化(changes)反应到远程分支上，你就必须得强推(force push)。 是因你快进(Fast forward)了提交，改变了Git历史, 远程分支不会接受变化(changes)，除非强推(force push)。这就是许多人使用 merge 工作流, 而不是 rebasing 工作流的主要原因之一， 开发者的强推(force push)会使大的团队陷入麻烦。使用时需要注意，一种安全使用 rebase 的方法是，不要把你的变化(changes)反映到远程分支上, 而是按下面的做:
 
 ```sh
 (master)$ git checkout my-branch
@@ -664,31 +648,31 @@ Unfortunately, you have to force push, if you want those changes to be reflected
 (master)$ git merge --ff-only my-branch
 ```
 
-For more, see [this SO thread](http://stackoverflow.com/questions/11058312/how-can-i-use-git-rebase-without-requiring-a-forced-push).
+更多, 参见 [this SO thread](http://stackoverflow.com/questions/11058312/how-can-i-use-git-rebase-without-requiring-a-forced-push).
 
 <a name="interactive-rebase"></a>
-### I need to combine commits
+### 我需要组合(combine)几个提交(commit)
 
-Let's suppose you are working in a branch that is/will become a pull-request against `master`. In the simplest case when all you want to do is to combine *all* commits into a single one and you don't care about commit timestamps, you can reset and recommit. Make sure the master branch is up to date and all your changes committed, then:
+假设你的工作分支将会做对于 `master` 的pull-request。 一般情况下你不关心提交(commit)的时间戳，只想组合 *所有* 提交(commit) 到一个单独的里面, 然后重置(reset)重提交(recommit)。 确保主(master)分支是最新的和你的变化都已经提交了, 然后:
 
 ```sh
 (my-branch)$ git reset --soft master
 (my-branch)$ git commit -am "New awesome feature"
 ```
 
-If you want more control, and also to preserve timestamps, you need to do something called an interactive rebase:
+如果你想要更多的控制, 想要保留时间戳, 你需要做交互式rebase (interactive rebase):
 
 ```sh
 (my-branch)$ git rebase -i master
 ```
 
-If you aren't working against another branch you'll have to rebase relative to your `HEAD`. If you want to squash the last 2 commits, for example, you'll have to rebase against `HEAD~2`. For the last 3, `HEAD~3`, etc.
+如果没有相对的其它分支， 你将不得不相对自己的`HEAD` 进行 rebase。 例如：你想组合最近的两次提交(commit), 你将相对于`HEAD~2` 进行rebase， 组合最近3次提交(commit), 相对于`HEAD~3`, 等等。
 
 ```sh
 (master)$ git rebase -i HEAD~2
 ```
 
-After you run the interactive rebase command, you will see something like this in your  text editor:
+在你执行了交互式 rebase的命令(interactive rebase command)后, 你将在你的编辑器里看到类似下面的内容:
 
 ```vim
 pick a9c8a1d Some refactoring
@@ -715,11 +699,11 @@ pick e3851e8 another fix
 # Note that empty commits are commented out
 ```
 
-All the lines beginning with a `#` are comments, they won't affect your rebase.
+所有以 `#` 开头的行都是注释, 不会影响 rebase.
 
-Then you replace `pick` commands with any in the list above, and you can also remove commits by removing corresponding lines.
+然后，你可以用任何上面命令列表的命令替换 `pick`, 你也可以通过删除对应的行来删除一个提交(commit)。
 
-For example, if you want to **leave the oldest (first) commit alone and combine all the following commits with the second oldest**, you should edit the letter next to each commit except the first and the second to say `f`:
+例如, 如果你想 **单独保留最旧(first)的提交(commit),组合所有剩下的到第二个里面**, 你就应该编辑第二个提交(commit)后面的每个提交(commit) 前的单词为 `f`:
 
 ```vim
 pick a9c8a1d Some refactoring
@@ -728,7 +712,7 @@ f b729ad5 fixup
 f e3851e8 another fix
 ```
 
-If you want to combine these commits **and rename the commit**, you should additionally add an `r` next to the second commit or simply use `s` instead of `f`:
+如果你想组合这些提交(commit) **并重命名这个提交(commit)**, 你应该在第二个提交(commit)旁边添加一个`r`，或者更简单的用`s` 替代 `f`:
 
 ```vim
 pick a9c8a1d Some refactoring
@@ -737,7 +721,7 @@ s b729ad5 fixup
 s e3851e8 another fix
 ```
 
-You can then rename the commit in the next text prompt that pops up.
+你可以在接下来弹出的文本提示框里重命名提交(commit)。
 
 ```vim
 Newer, awesomer features
@@ -753,72 +737,72 @@ Newer, awesomer features
 
 ```
 
-If everything is successful, you should see something like this:
+如果成功了, 你应该看到类似下面的内容:
 
 ```sh
 (master)$ Successfully rebased and updated refs/heads/master.
 ```
 
-#### Safe merging strategy
-`--no-commit` performs the merge but pretends the merge failed and does not autocommit, giving the user a chance to inspect and further tweak the merge result before committing. `no-ff` maintains evidence that a feature branch once existed, keeping project history consistent.
+#### 安全合并(merging)策略
+`--no-commit` 执行合并(merge)但不自动提交, 给用户在做提交前检查和修改的机会。 `no-ff` 会为特性分支(feature branch)的存在过留下证据, 保持项目历史一致。
 
 ```sh
 (master)$ git merge --no-ff --no-commit my-branch
 ```
 
-#### I need to merge a branch into a single commit
+#### 我需要将一个分支合并成一个提交(commit)
 
 ```sh
 (master)$ git merge --squash my-branch
 ```
 
 <a name="rebase-unpushed-commits"></a>
-#### I want to combine only unpushed commits
+#### 我只想组合(combine)未推的提交(unpushed commit)
 
-Sometimes you have several work in progress commits that you want to combine before you push them upstream. You don't want to accidentally combine any commits that have already been pushed upstream because someone else may have already made commits that reference them.
+有时候，在将数据推向上游之前，你有几个正在进行的工作提交(commit)。这时候不希望把已经推(push)过的组合进来，因为其他人可能已经有提交(commit)引用它们了。
 
 ```sh
 (master)$ git rebase -i @{u}
 ```
 
-This will do an interactive rebase that lists only the commits that you haven't already pushed, so it will be safe to reorder/fix/squash anything in the list.
+这会产生一次交互式的rebase(interactive rebase), 只会列出没有推(push)的提交(commit)， 在这个列表时进行reorder/fix/squash 都是安全的。
 
 <a name="check-if-all-commits-on-a-branch-are-merged"></a>
-### Check if all commits on a branch are merged
+### 检查是否分支上的所有提交(commit)都合并(merge)过了
 
-To check if all commits on a branch are merged into another branch, you should diff between the heads (or any commits) of those branches:
+检查一个分支上的所有提交(commit)是否都已经合并(merge)到了其它分支, 你应该在这些分支的head(或任何 commits)之间做一次diff:
 
 ```sh
 (master)$ git log --graph --left-right --cherry-pick --oneline HEAD...feature/120-on-scroll
 ```
 
-This will tell you if any commits are in one but not the other, and will give you a list of any nonshared between the branches. Another option is to do this:
+这会告诉你在一个分支里有而另一个分支没有的所有提交(commit), 和分支之间不共享的提交(commit)的列表。 另一个做法可以是:
 
 ```sh
 (master)$ git log master ^feature/120-on-scroll --no-merges
 ```
 
-### Possible issues with interactive rebases
+### 交互式rebase(interactive rebase)可能出现的问题
 
 <a name="noop"></a>
-#### The rebase editing screen says 'noop'
+#### 这个rebase 编辑屏幕出现'noop'
 
-If you're seeing this:
+如果你看到的是这样:
 ```
 noop
 ```
 
-That means you are trying to rebase against a branch that is at an identical commit, or is *ahead* of your current branch. You can try:
+这意味着你rebase的分支和当前分支在同一个提交(commit)上, 或者 *领先(ahead)* 当前分支。 你可以尝试:
 
-* making sure your master branch is where it should be
-* rebase against `HEAD~2` or earlier instead
+* 检查确保主(master)分支没有问题
+* rebase  `HEAD~2` 或者更早
 
 <a name="merge-conflict"></a>
-#### There were conflicts
+#### 有冲突的情况
 
-If you are unable to successfully complete the rebase, you may have to resolve conflicts.
+如果你不能成功的完成rebase, 你可能必须要解决冲突。
 
-First run `git status` to see which files have conflicts in them:
+首先执行 `git status` 找出哪些文件有冲突:
 
 ```sh
 (my-branch)$ git status
@@ -827,10 +811,10 @@ Changes not staged for commit:
   (use "git add <file>..." to update what will be committed)
   (use "git checkout -- <file>..." to discard changes in working directory)
 
-  both modified:   README.md
+	modified:   README.md
 ```
 
-In this example, `README.md` has conflicts. Open that file and look for the following:
+在这个例子里面, `README.md` 有冲突。 打开这个文件找到类似下面的内容:
 
 ```vim
    <<<<<<< HEAD
@@ -840,56 +824,47 @@ In this example, `README.md` has conflicts. Open that file and look for the foll
    >>>>>>> new-commit
 ```
 
-You will need to resolve the differences between the code that was added in your new commit (in the example, everything from the middle line to `new-commit`) and your `HEAD`.
+你需要解决新提交的代码(示例里, 从中间`==`线到`new-commit`的地方)与`HEAD` 之间不一样的地方.
 
-If you want to keep one branch's version of the code, you can use `--ours` or `--theirs`:
-
-```sh
-(master*)$ git checkout --ours README.md
-```
-
-- When *merging*, use `--ours` to keep changes from the local branch, or `--theirs` to keep changes from the other branch.
-- When *rebasing*, use `--theirs` to keep changes from the local branch, or `--ours` to keep changes from the other branch. For an explanation of this swap, see [this note in the git documentation](https://git-scm.com/docs/git-rebase#git-rebase---merge).
-
-If the merges are more complicated, you can use a visual diff editor:
+有时候这些合并非常复杂，你应该使用可视化的差异编辑器(visual diff editor):
 
 ```sh
 (master*)$ git mergetool -t opendiff
 ```
 
-After you have resolved all conflicts and tested your code, `git add` the files you have changed, and then continue the rebase with `git rebase --continue`
+在你解决完所有冲突和测试过后, `git add` 变化了的(changed)文件, 然后用`git rebase --continue` 继续rebase。
 
 ```sh
 (my-branch)$ git add README.md
 (my-branch)$ git rebase --continue
 ```
 
-If after resolving all the conflicts you end up with an identical tree to what it was before the commit, you need to `git rebase --skip` instead.
+如果在解决完所有的冲突过后，得到了与提交前一样的结果, 可以执行`git rebase --skip`。
 
-If at any time you want to stop the entire rebase and go back to the original state of your branch, you can do so:
+任何时候你想结束整个rebase 过程，回来rebase前的分支状态, 你可以做:
 
 ```sh
 (my-branch)$ git rebase --abort
 ```
 
 <a name="miscellaneous-objects"></a>
-## Miscellaneous Objects
+## 杂项(Miscellaneous Objects)
 
 <a name="clone-submodules"></a>
-### Clone all submodules
+### 克隆所有子模块
 
 ```sh
 $ git clone --recursive git://github.com/foo/bar.git
 ```
 
-If already cloned:
+如果已经克隆了:
 
 ```sh
 $ git submodule update --init --recursive
 ```
 
 <a name="delete-tag"></a>
-### Delete tag
+### 删除标签(tag)
 
 ```sh
 $ git tag -d <tag_name>
@@ -897,70 +872,51 @@ $ git push <remote> :refs/tags/<tag_name>
 ```
 
 <a name="recover-tag"></a>
-### Recover a deleted tag
+### 恢复已删除标签(tag)
 
-If you want to recover a tag that was already deleted, you can do so by following these steps: First, you need to find the unreachable tag:
+如果你想恢复一个已删除标签(tag), 可以按照下面的步骤: 首先, 需要找到无法访问的标签(unreachable tag):
 
 ```sh
 $ git fsck --unreachable | grep tag
 ```
 
-Make a note of the tag's hash. Then, restore the deleted tag with following, making use of git's [update-ref](http://git-scm.com/docs/git-update-ref):
+记下这个标签(tag)的hash，然后用Git的 [update-ref](http://git-scm.com/docs/git-update-ref):
 
 ```sh
 $ git update-ref refs/tags/<tag_name> <hash>
 ```
 
-Your tag should now have been restored.
+这时你的标签(tag)应该已经恢复了。
 
 <a name="deleted-patch"></a>
-### Deleted Patch
+### 已删除补丁(patch)
 
-If someone has sent you a pull request on GitHub, but then deleted their original fork, you will be unable to clone their repository or to use `git am` as the [.diff, .patch](https://github.com/blog/967-github-secrets) urls become unavailable. But you can checkout the PR itself using [GitHub's special refs](https://gist.github.com/piscisaureus/3342247). To fetch the content of PR#1 into a new branch called pr_1:
+如果某人在 GitHub 上给你发了一个pull request, 但是然后他删除了他自己的原始 fork, 你将没法克隆他们的提交(commit)或使用 `git am`。在这种情况下, 最好手动的查看他们的提交(commit)，并把它们拷贝到一个本地新分支，然后做提交。
 
-```sh
-$ git fetch origin refs/pull/1/head:pr_1
-From github.com:foo/bar
- * [new ref]         refs/pull/1/head -> pr_1
-```
+做完提交后, 再修改作者，参见[变更作者](#commit-wrong-author)。 然后, 应用变化, 再发起一个新的pull request。
 
-## Tracking Files
+## 跟踪文件(Tracking Files)
 
 <a href="i-want-to-change-a-file-names-capitalization-without-changing-the-contents-of-the-file"></a>
-### I want to change a file name's capitalization, without changing the contents of the file.
+### 我只想改变一个文件名字的大小写，而不修改内容
 
 ```sh
 (master)$ git mv --force myfile MyFile
 ```
 
 <a href="remove-from-git"></a>
-### I want to remove a file from git but keep the file
+### 我想从Git删除一个文件，但保留该文件
 
 ```sh
 (master)$ git rm --cached log.txt
 ```
 
-<a href="i-want-to-revert-a-file-to-a-specific-revision"></a>
-### I want to revert a file to a specific revision
-
-Assuming the hash of the commit you want is c5f567:
-
-```sh
-(master)$ git checkout c5f567 -- file1/to/restore file2/to/restore
-```
-
-If you want to revert to changes made just 1 commit before c5f567, pass the commit hash as c5f567~1:
-
-```sh
-(master)$ git checkout c5f567~1 -- file1/to/restore file2/to/restore
-```
-
-## Configuration
+## 配置(Configuration)
 
 <a name="adding-command-aliases"></a>
-### I want to add aliases for some git commands
+### 我想给一些Git命令添加别名(alias)
 
-On OS X and Linux, your git configuration file is stored in ```~/.gitconfig```.  I've added some example aliases I use as shortcuts (and some of my common typos) in the ```[alias]``` section as shown below:
+在 OS X 和 Linux 下, 你的 Git的配置文件储存在 ```~/.gitconfig```。我在```[alias]``` 部分添加了一些快捷别名(和一些我容易拼写错误的)，如下:
 
 ```vim
 [alias]
@@ -986,9 +942,9 @@ On OS X and Linux, your git configuration file is stored in ```~/.gitconfig```. 
 ```
 
 <a name="credential-helper"></a>
-### I want to cache a username and password for a repository
+### 我想缓存一个仓库(repository)的用户名和密码
 
-You might have a repository that requires authentication.  In which case you can cache a username and password so you don't have to enter it on every push / pull. Credential helper can do this for you.
+你可能有一个仓库需要授权，这时你可以缓存用户名和密码，而不用每次推/拉(push/pull)的时候都输入，Credential helper能帮你。
 
 ```sh
 $ git config --global credential.helper cache
@@ -1001,11 +957,11 @@ $ git config --global credential.helper 'cache --timeout=3600'
 ```
 
 <a href="#ive-no-idea-what-i-did-wrong"></a>
-## I've no idea what I did wrong
+## 我不知道我做错了些什么
 
-So, you're screwed - you `reset` something, or you merged the wrong branch, or you force pushed and now you can't find your commits. You know, at some point, you were doing alright, and you want to go back to some state you were at.
+你把事情搞砸了：你 `重置(reset)` 了一些东西, 或者你合并了错误的分支, 亦或你强推了后找不到你自己的提交(commit)了。有些时候, 你一直都做得很好, 但你想回到以前的某个状态。
 
-This is what `git reflog` is for. `reflog` keeps track of any changes to the tip of a branch, even if that tip isn't referenced by a branch or a tag. Basically, every time HEAD changes, a new entry is added to the reflog. This only works for local repositories, sadly, and it only tracks movements (not changes to a file that weren't recorded anywhere, for instance).
+这就是 `git reflog` 的目的， `reflog` 记录对分支顶端(the tip of a branch)的任何改变, 即使那个顶端没有被任何分支或标签引用。基本上, 每次HEAD的改变, 一条新的记录就会增加到`reflog`。遗憾的是，这只对本地分支起作用，且它只跟踪动作 (例如，不会跟踪一个没有被记录的文件的任何改变)。
 
 ```sh
 (master)$ git reflog
@@ -1014,51 +970,46 @@ This is what `git reflog` is for. `reflog` keeps track of any changes to the tip
 c10f740 HEAD@{2}: checkout: moving from master to 2.2
 ```
 
-The reflog above shows a checkout from master to the 2.2 branch and back. From there, there's a hard reset to an older commit. The latest activity is represented at the top labeled `HEAD@{0}`.
+上面的reflog展示了从master分支签出(checkout)到2.2 分支，然后再签回。 那里，还有一个硬重置(hard reset)到一个较旧的提交。最新的动作出现在最上面以 `HEAD@{0}`标识.
 
-If it turns out that you accidentally moved back, the reflog will contain the commit master pointed to (0254ea7) before you accidentally dropped 2 commits.
+如果事实证明你不小心回移(move back)了提交(commit), reflog 会包含你不小心回移前master上指向的提交(0254ea7)。
 
 ```sh
 $ git reset --hard 0254ea7
 ```
 
-Using git reset it is then possible to change master back to the commit it was before. This provides a safety net in case history was accidentally changed.
+然后使用git reset就可以把master改回到之前的commit，这提供了一个在历史被意外更改情况下的安全网。
 
-(copied and edited from [Source](https://www.atlassian.com/git/tutorials/rewriting-history/git-reflog)).
+([摘自](https://www.atlassian.com/git/tutorials/rewriting-history/git-reflog)).
 
 
-# Other Resources
+# 其它资源(Other Resources)
 
-## Books
+## 书(Books)
 
 * [Pro Git](https://git-scm.com/book/en/v2) - Scott Chacon's excellent git book
 * [Git Internals](https://github.com/pluralsight/git-internals-pdf) - Scott Chacon's other excellent git book
 
-## Tutorials
+## 教程(Tutorials)
 
-* [Learn Git branching](https://learngitbranching.js.org/) An interactive web based branching/merging/rebasing tutorial
+* [Learn Git branching](https://learngitbranching.js.org/) 一个基于网页的交互式 branching/merging/rebasing 教程
 * [Getting solid at Git rebase vs. merge](https://medium.com/@porteneuve/getting-solid-at-git-rebase-vs-merge-4fa1a48c53aa)
-* [git-workflow](https://github.com/asmeurer/git-workflow) - [Aaron Meurer](https://github.com/asmeurer)'s howto on using git to contribute to open source repositories
-* [GitHub as a workflow](http://hugogiraudel.com/2015/08/13/github-as-a-workflow/) - An interesting take on using GitHub as a workflow, particularly with empty PRs
+* [git-workflow](https://github.com/asmeurer/git-workflow) - [Aaron Meurer](https://github.com/asmeurer)的怎么使用Git为开源仓库贡献
+* [GitHub as a workflow](http://hugogiraudel.com/2015/08/13/github-as-a-workflow/) - 使用GitHub做为工作流的趣事, 尤其是空PRs
 
-## Scripts and Tools
+## 脚本和工具(Scripts and Tools)
 
-* [firstaidgit.io](http://firstaidgit.io/) A searchable selection of the most frequently asked Git questions
-* [git-extra-commands](https://github.com/unixorn/git-extra-commands) - a collection of useful extra git scripts
-* [git-extras](https://github.com/tj/git-extras) - GIT utilities -- repo summary, repl, changelog population, author commit percentages and more
-* [git-fire](https://github.com/qw3rtman/git-fire) - git-fire is a Git plugin that helps in the event of an emergency by adding all current files, committing, and pushing to a new branch (to prevent merge conflicts).
-* [git-tips](https://github.com/git-tips/tips) - Small git tips
-* [git-town](https://github.com/Originate/git-town) - Generic, high-level Git workflow support! http://www.git-town.com
+* [firstaidgit.io](http://firstaidgit.io/) 一个可搜索的最常被问到的Git的问题
+* [git-extra-commands](https://github.com/unixorn/git-extra-commands) - 一堆有用的额外的Git脚本
+* [git-extras](https://github.com/tj/git-extras) - GIT 工具集 -- repo summary, repl, changelog population, author commit percentages and more
+* [git-fire](https://github.com/qw3rtman/git-fire) - git-fire 是一个 Git 插件，用于帮助在紧急情况下添加所有当前文件, 做提交(committing), 和推(push)到一个新分支(阻止合并冲突)。
+* [git-tips](https://github.com/git-tips/tips) - Git小提示
+* [git-town](https://github.com/Originate/git-town) - 通用，高级Git工作流支持！ http://www.git-town.com
 
-## GUI Clients
-* [GitKraken](https://www.gitkraken.com/) - The downright luxurious Git client,for Windows, Mac & Linux
-* [git-cola](https://git-cola.github.io/) - another git client for Windows and OS X
-* [GitUp](https://github.com/git-up/GitUp) - A newish GUI that has some very opinionated ways of dealing with git's complications
-* [gitx-dev](https://rowanj.github.io/gitx/) - another graphical git client for OS X
-* [Source Tree](https://www.sourcetreeapp.com/) - a free graphical git client for Windows and OS X
-* [Tower](http://www.git-tower.com/) - graphical git client for OS X (paid)
-* [tig](https://jonas.github.io/tig/) - terminal text-mode interface for Git
-* [Magit](https://magit.vc/) - Interface to git implemented as an Emacs package.
-* [GitExtensions](https://github.com/gitextensions/gitextensions) - a shell extension, a Visual Studio 2010-2015 plugin and a standalone Git repository tool.
-* [Fork](https://git-fork.com/) - a fast and friendly git client for Mac (beta)
-* [gmaster](https://gmaster.io/) - a git client for Windows that has 3-way merge, analyze refactors, semantic diff and merge (beta)
+## GUI客户端(GUI Clients)
+* [GitKraken](https://www.gitkraken.com/) - 豪华的Git客户端 Windows, Mac & Linux
+* [git-cola](https://git-cola.github.io/) - 另外一个Git客户端 Windows & OS X
+* [GitUp](https://github.com/git-up/GitUp) - 一个新的Git客户端，在处理Git的复杂性上有自己的特点
+* [gitx-dev](https://rowanj.github.io/gitx/) - 图形化的Git客户端 OS X
+* [Source Tree](https://www.sourcetreeapp.com/) - 免费的图形化Git客户端 Windows & OS X
+* [Tower](http://www.git-tower.com/) - 图形化Git客户端 OS X(付费)
